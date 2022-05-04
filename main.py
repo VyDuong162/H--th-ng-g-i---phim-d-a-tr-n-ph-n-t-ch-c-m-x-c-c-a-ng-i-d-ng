@@ -18,6 +18,10 @@ import re
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
+from bs4 import BeautifulSoup
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+nltk.download('wordnet')
 nltk.download('stopwords')
 ia = imdb.IMDb()
 # Loading the model from a path on localhost.
@@ -26,12 +30,13 @@ clf = keras.models.load_model('my_model/', options=load_options)
 tokenizer = joblib.load('tokenizer.pkl')
 stopset = set(stopwords.words('english'))
 def preprocess_text(review):
-    review = re.sub(r"http\S+", "", review)                               
+    review = re.sub(r"http\S+", "", review)                            
     review = re.sub("\S*\d\S*", "", review).strip()     
     review = re.sub(r'<.*?>', '', review)  
     review = re.sub('[^A-Za-z]+', ' ', review)       
     review = review.lower()                            
     review = [word for word in review.split(" ") if not word in stopset] 
+    review = [lemmatizer.lemmatize(token, "v") for token in review]
     review = " ".join(review)
     review.strip()
     return review
@@ -100,36 +105,6 @@ def rcmd(m):
         print(l_result)
         print(lst_score)
         return l_result
-def score_review(n):
-    list_score = []
-    list_review = []
-    for i in range(len(n)):
-        count = 0
-        # web scraping to get user reviews from IMDB site
-        sauce = urllib.request.urlopen('https://www.imdb.com/title/{}/reviews?ref_=tt_ov_rt'.format(n[i])).read()
-        soup = bs.BeautifulSoup(sauce,'lxml')
-        soup_result = soup.find_all("div",{"class":"text show-more__control"})
-
-        reviews_list = [] # list of reviews
-        for reviews in soup_result:
-            if reviews.string:
-                reviews_list.append(reviews.string)
-                # passing the review to our model
-                text =preprocess_text(reviews.string)
-                movie_review_list = np.array([text])
-                text_seq = tokenizer.texts_to_sequences(movie_review_list)
-                movie_vector = pad_sequences(text_seq, maxlen=120,truncating='post', padding='post')
-                pred = clf.predict(movie_vector)
-                if pred >=0.5 and pred <= 1 :
-                    count = count + 1
-        if(len(reviews_list)==0):
-            avg_score=0
-        else:
-            avg_score = round(count/len(reviews_list),3)
-        len_review = len(reviews_list) 
-        list_score.append(avg_score)
-        list_review.append(len_review)
-    return list_score,list_review
 # converting list of string to list (eg. "["abc","def"]" to ["abc","def"])
 def convert_to_list(my_list):
     my_list = my_list.split('","')
@@ -221,9 +196,10 @@ def recommend():
         if reviews.string:
             reviews_list.append(reviews.string)
             # passing the review to our model
+            text =preprocess_text(reviews.string)
             movie_review_list = np.array([reviews.string])
             text_seq = tokenizer.texts_to_sequences(movie_review_list)
-            movie_vector = pad_sequences(text_seq, maxlen=1000,truncating='post', padding='post')
+            movie_vector = pad_sequences(text_seq, maxlen=120,truncating='post', padding='post')
             pred = clf.predict(movie_vector)
             reviews_status.append('Good' if pred >= 0.5 else 'Bad')
 
