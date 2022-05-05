@@ -197,11 +197,11 @@ def recommend():
             reviews_list.append(reviews.string)
             # passing the review to our model
             text =preprocess_text(reviews.string)
-            movie_review_list = np.array([reviews.string])
+            movie_review_list = np.array([text])
             text_seq = tokenizer.texts_to_sequences(movie_review_list)
             movie_vector = pad_sequences(text_seq, maxlen=120,truncating='post', padding='post')
             pred = clf.predict(movie_vector)
-            reviews_status.append('Good' if pred >= 0.5 else 'Bad')
+            reviews_status.append('Good' if pred >=0.5 else 'Bad')
 
     # combining reviews and comments into a dictionary
     movie_reviews = {reviews_list[i]: reviews_status[i] for i in range(len(reviews_list))}    
