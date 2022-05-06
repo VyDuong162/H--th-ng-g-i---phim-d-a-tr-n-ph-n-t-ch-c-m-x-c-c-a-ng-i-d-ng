@@ -141,7 +141,6 @@ h6 {
 		display: flex;
 	}
 }
-
 @media only screen and (min-width: 651px) {
   .poster-sm {
     display: none;

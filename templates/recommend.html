@@ -49,6 +49,12 @@
       -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
       background-color: #555;
     }
+    main{
+      margin-top: -340px;
+    }
+    .footer{
+      position: relative;
+    }
   </style>
 </head>
 
@@ -68,17 +74,17 @@
       <div class="poster-sm text-center">
         <img class="poster" style="border-radius: 40px;margin-bottom: 5%;" height="400" width="250" src={{poster}}>
       </div>
-      <div id="details">
+      <div id="details" style="color: #d3d3d3;">
         <br />
-        <h6 id="title" style="color:gray;">TITLE: &nbsp;{{title}}</h6>
-        <h6 id="overview" style="color:gray;max-width: 85%">OVERVIEW:
+        <h6 id="title">TITLE: &nbsp;{{title}}</h6>
+        <h6 id="overview" style="max-width: 85%">OVERVIEW:
           <br /><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{overview}}
         </h6>
-        <h6 id="vote_average" style="color:gray;">RATING: &nbsp;{{vote_average}}/10 ({{vote_count}} votes)</h6>
-        <h6 id="genres" style="color:gray;">GENRE: &nbsp;{{genres}}</h6>
-        <h6 id="date" style="color:gray;">RELEASE DATE: &nbsp;{{release_date}}</h6>
-        <h6 id="runtime" style="color:gray;">RUNTIME: &nbsp;{{runtime}}</h6>
-        <h6 id="status" style="color:gray;">STATUS: &nbsp;{{status}}</h6>
+        <h6 id="vote_average">RATING: &nbsp;{{vote_average}}/10 ({{vote_count}} votes)</h6>
+        <h6 id="genres">GENRE: &nbsp;{{genres}}</h6>
+        <h6 id="date">RELEASE DATE: &nbsp;{{release_date}}</h6>
+        <h6 id="runtime">RUNTIME: &nbsp;{{runtime}}</h6>
+        <h6 id="status">STATUS: &nbsp;{{status}}</h6>
       </div>
     </div>
   </div>
@@ -127,8 +133,7 @@
   </div>
   <!-- owl carousel menu -->
  
-    <div class="movie-content" style="background-color: #181818b5; height: 400px; overflow: auto;">
-     
+     <div class="movie-content" style="background-color: #181818b5;">  <!--height: 400px; overflow: auto; -->
         {% for poster, title in movie_cards.items() if not movie_cards.hidden %}
         <div class="card" style="width: 200px; word-wrap: break-word;" title="{{title}}" onclick="recommendcard(this)">
           <div class="imghvr">
@@ -138,7 +143,7 @@
             </figcaption>
           </div>
           <div class="card-body">
-            <h5 class="card-title">{{title|capitalize}}</h5>
+            <h5 class="card-title">{{title| title}}</h5>
           </div>
         </div>
         {% endfor %}
