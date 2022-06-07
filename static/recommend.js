@@ -47,7 +47,7 @@ function load_details(my_api_key,title){
       if(movie.results.length<1){
         $('.fail').css('display','block');
         $('.results').css('display','none');
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       }
       else{
         $("#loader").fadeIn();
@@ -60,7 +60,7 @@ function load_details(my_api_key,title){
     },
     error: function(){
       alert('Invalid Request');
-      $("#loader").delay(900).fadeOut();
+      $("#loader").delay(500).fadeOut();
     },
   });
 }
@@ -74,7 +74,7 @@ function movie_recs(movie_title,movie_id,my_api_key){
       if(recs=="Sorry! The movie you requested is not in our database. Please check the spelling or try with some other movies"){
         $('.fail').css('display','block');
         $('.results').css('display','none');
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       }
       else {
         $('.fail').css('display','none');
@@ -89,7 +89,7 @@ function movie_recs(movie_title,movie_id,my_api_key){
     },
     error: function(){
       alert("error recs");
-      $("#loader").delay(900).fadeOut();
+      $("#loader").delay(500).fadeOut();
     },
   }); 
 }
@@ -104,7 +104,7 @@ function get_movie_details(movie_id,my_api_key,arr,movie_title) {
     },
     error: function(){
       alert("API Error!");
-      $("#loader").delay(900).fadeOut();
+      $("#loader").delay(500).fadeOut();
     },
   });
 }
@@ -132,19 +132,19 @@ function show_details(movie_details,arr,movie_title,my_api_key,movie_id){
     runtime = Math.floor(runtime/60)+" hour(s) "+(runtime%60)+" min(s)"
   }
   arr_poster = get_movie_posters(arr,my_api_key);
-  movie_cast = get_movie_cast(movie_id,my_api_key);
+  // movie_cast = get_movie_cast(movie_id,my_api_key);
   
-  ind_cast = get_individual_cast(movie_cast,my_api_key);
+  // ind_cast = get_individual_cast(movie_cast,my_api_key);
   
   details = {
     'title':movie_title,
-      'cast_ids':JSON.stringify(movie_cast.cast_ids),
-      'cast_names':JSON.stringify(movie_cast.cast_names),
-      'cast_chars':JSON.stringify(movie_cast.cast_chars),
-      'cast_profiles':JSON.stringify(movie_cast.cast_profiles),
-      'cast_bdays':JSON.stringify(ind_cast.cast_bdays),
-      'cast_bios':JSON.stringify(ind_cast.cast_bios),
-      'cast_places':JSON.stringify(ind_cast.cast_places),
+      // 'cast_ids':JSON.stringify(movie_cast.cast_ids),
+      // 'cast_names':JSON.stringify(movie_cast.cast_names),
+      // 'cast_chars':JSON.stringify(movie_cast.cast_chars),
+      // 'cast_profiles':JSON.stringify(movie_cast.cast_profiles),
+      // 'cast_bdays':JSON.stringify(ind_cast.cast_bdays),
+      // 'cast_bios':JSON.stringify(ind_cast.cast_bios),
+      // 'cast_places':JSON.stringify(ind_cast.cast_places),
       'imdb_id':imdb_id,
       'poster':poster,
       'genres':my_genre,
@@ -165,7 +165,7 @@ function show_details(movie_details,arr,movie_title,my_api_key,movie_id){
     url:"/recommend",
     dataType: 'html',
     complete: function(){
-      $("#loader").delay(9000).fadeOut();
+      $("#loader").delay(500).fadeOut();
     },
     success: function(response) {
       $('.results').html(response);
@@ -223,7 +223,7 @@ function get_movie_cast(movie_id,my_api_key){
       },
       error: function(){
         alert("Invalid Request!");
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       }
     });
 
@@ -243,7 +243,7 @@ function get_movie_posters(arr,my_api_key){
       },
       error: function(){
         alert("Invalid Request!");
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       },
     })
   }
@@ -263,7 +263,7 @@ function get_id_movie_similar(arr,my_api_key){
       },
       error: function(){
         alert("Invalid Request!");
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       },
     })
   }
@@ -283,7 +283,7 @@ function get_imdb_id_movie_similar(arr_id,my_api_key){
       },
       error: function(){
         alert("API Error!");
-        $("#loader").delay(900).fadeOut();
+        $("#loader").delay(500).fadeOut();
       },
     })
   }

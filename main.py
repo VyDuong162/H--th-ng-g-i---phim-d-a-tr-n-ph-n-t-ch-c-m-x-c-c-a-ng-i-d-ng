@@ -23,7 +23,8 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 nltk.download('wordnet')
 nltk.download('stopwords')
-ia = imdb.IMDb()
+ia = imdb.IMDb(accessSystem='http', reraiseExceptions=True)
+from imdb import IMDbDataAccessError
 # Loading the model from a path on localhost.
 load_options = tf.saved_model.LoadOptions(experimental_io_device='/job:localhost')
 clf = keras.models.load_model('my_model/', options=load_options)
@@ -68,12 +69,15 @@ def rcmd(m):
             l.append(data['movie_title'][a])
         list_id = []
         for mv in range(len(l)):
-            search = ia.search_movie(l[mv])
-            id = search[0].movieID
-            list_id.append("tt"+id) 
-        lst_score=[]
+            try:
+                search = ia.search_movie(l[mv])
+                id = search[0].movieID
+                list_id.append("tt"+id) 
+            except:
+                print("error")
+            lst_score=[]
         for i in range(len(list_id)):
-            count = 0
+            count_p = 0
             # web scraping to get user reviews from IMDB site
             sauce = urllib.request.urlopen('https://www.imdb.com/title/{}/reviews?ref_=tt_ov_rt'.format(list_id[i])).read()
             soup = bs.BeautifulSoup(sauce,'lxml')
@@ -88,22 +92,25 @@ def rcmd(m):
                     text_seq = tokenizer.texts_to_sequences(movie_review_list)
                     movie_vector = pad_sequences(text_seq, maxlen=120,truncating='post', padding='post')
                     pred = clf.predict(movie_vector)
-                    if pred >=0.5 and pred <= 1 :
-                        count = count + 1
+                    if pred >=0.5:
+                        count_p = count_p + 1
             if(len(reviews_list)==0):
                 avg_score=0
             else:
-                avg_score = round(count/len(reviews_list),3)
+                avg_score = round(count_p/len(reviews_list),3)
             lst_score.append((lst[i][0],avg_score))
         print(lst_score)
-        lst_score = sorted(lst_score, key = lambda x:x[1] ,reverse=True)
+        top_lst_score = sorted(filter(lambda x:x[1]>=0.5, lst_score),key=lambda x:x[1], reverse=True)
+        if len(top_lst_score)>=5:
+            top5 = top_lst_score[:5]
+        else:
+            top5 =top_lst_score
         l_result=[]
-        for i in range(len(lst_score)):
-            a = lst_score[i][0]
+        for i in range(len(top5)):
+            a = top5[i][0]
             l_result.append(data['movie_title'][a])
-        print(l)
-        print(l_result)
         print(lst_score)
+        print(top5)
         return l_result
 # converting list of string to list (eg. "["abc","def"]" to ["abc","def"])
 def convert_to_list(my_list):
@@ -139,13 +146,13 @@ def similarity():
 def recommend():
     # getting data from AJAX request
     title = request.form['title']
-    cast_ids = request.form['cast_ids']
-    cast_names = request.form['cast_names']
-    cast_chars = request.form['cast_chars']
-    cast_bdays = request.form['cast_bdays']
-    cast_bios = request.form['cast_bios']
-    cast_places = request.form['cast_places']
-    cast_profiles = request.form['cast_profiles']
+    # cast_ids = request.form['cast_ids']
+    # cast_names = request.form['cast_names']
+    # cast_chars = request.form['cast_chars']
+    # cast_bdays = request.form['cast_bdays']
+    # cast_bios = request.form['cast_bios']
+    # cast_places = request.form['cast_places']
+    # cast_profiles = request.form['cast_profiles']
     imdb_id = request.form['imdb_id']
     poster = request.form['poster']
     genres = request.form['genres']
@@ -163,33 +170,33 @@ def recommend():
     # call the convert_to_list function for every string that needs to be converted to list
     rec_movies = convert_to_list(rec_movies)
     rec_posters = convert_to_list(rec_posters)   
-    cast_names = convert_to_list(cast_names)
-    cast_chars = convert_to_list(cast_chars)
-    cast_profiles = convert_to_list(cast_profiles)
-    cast_bdays = convert_to_list(cast_bdays)
-    cast_bios = convert_to_list(cast_bios)
-    cast_places = convert_to_list(cast_places)
+    # cast_names = convert_to_list(cast_names)
+    # cast_chars = convert_to_list(cast_chars)
+    # cast_profiles = convert_to_list(cast_profiles)
+    # cast_bdays = convert_to_list(cast_bdays)
+    # cast_bios = convert_to_list(cast_bios)
+    # cast_places = convert_to_list(cast_places)
     # convert string to list (eg. "[1,2,3]" to [1,2,3])
-    cast_ids = cast_ids.split(',')
-    cast_ids[0] = cast_ids[0].replace("[","")
-    cast_ids[-1] = cast_ids[-1].replace("]","")
+    # cast_ids = cast_ids.split(',')
+    # cast_ids[0] = cast_ids[0].replace("[","")
+    # cast_ids[-1] = cast_ids[-1].replace("]","")
     
     # rendering the string to python string
-    for i in range(len(cast_bios)):
-        cast_bios[i] = cast_bios[i].replace(r'\n', '\n').replace(r'\"','\"')
+    # for i in range(len(cast_bios)):
+    #     cast_bios[i] = cast_bios[i].replace(r'\n', '\n').replace(r'\"','\"')
     
     # combining multiple lists as a dictionary which can be passed to the html file so that it can be processed easily and the order of information will be preserved
     movie_cards = {rec_posters[i]: rec_movies[i] for i in range(len(rec_posters))}
     
-    casts = {cast_names[i]:[cast_ids[i], cast_chars[i], cast_profiles[i]] for i in range(len(cast_profiles))}
+# casts = {cast_names[i]:[cast_ids[i], cast_chars[i], cast_profiles[i]] for i in range(len(cast_profiles))}
 
-    cast_details = {cast_names[i]:[cast_ids[i], cast_profiles[i], cast_bdays[i], cast_places[i], cast_bios[i]] for i in range(len(cast_places))}
+    #cast_details = {cast_names[i]:[cast_ids[i], cast_profiles[i], cast_bdays[i], cast_places[i], cast_bios[i]] for i in range(len(cast_places))}
 
     # web scraping to get user reviews from IMDB site
     sauce = urllib.request.urlopen('https://www.imdb.com/title/{}/reviews?ref_=tt_ov_rt'.format(imdb_id)).read()
     soup = bs.BeautifulSoup(sauce,'lxml')
     soup_result = soup.find_all("div",{"class":"text show-more__control"})
-
+    count_p = 0
     reviews_list = [] # list of reviews
     reviews_status = [] # list of comments (good or bad)
     for reviews in soup_result:
@@ -202,13 +209,26 @@ def recommend():
             movie_vector = pad_sequences(text_seq, maxlen=120,truncating='post', padding='post')
             pred = clf.predict(movie_vector)
             reviews_status.append('Good' if pred >=0.5 else 'Bad')
-
+            if pred >= 0.5:
+                count_p+=1
+    count_n = len(reviews_list) - count_p
+    if(len(reviews_list)==0):
+        avg_score=0
+    else:
+        avg_score = round(count_p/len(reviews_list),3)
+    # Statistics Classification of comments
+    sentiment_cls =[0,1]
+    reviews_count =[count_n, count_p]
+    sentiment_count={sentiment_cls[i]: reviews_count[i] for i in range(len(sentiment_cls))}
+    sentiment_avg = []
+    sentiment_avg.append('Good' if avg_score >=0.5 else 'Bad')
     # combining reviews and comments into a dictionary
     movie_reviews = {reviews_list[i]: reviews_status[i] for i in range(len(reviews_list))}    
     # passing all the data to the html file
     return render_template('recommend.html',title=title,poster=poster,overview=overview,vote_average=vote_average,
         vote_count=vote_count,release_date=release_date,runtime=runtime,status=status,genres=genres,
-        movie_cards=movie_cards,reviews=movie_reviews,casts=casts,cast_details=cast_details)
+        movie_cards=movie_cards,reviews=movie_reviews,sentiment_count=sentiment_count,sentiment_avg=sentiment_avg[0])
+    # casts=casts,cast_details=cast_details
 from livereload import Server
 if __name__ == '__main__':
     server = Server(app.wsgi_app)
